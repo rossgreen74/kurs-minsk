@@ -36,7 +36,10 @@ jobs:
       - name: Снять курсы
         run: python build.py
       - name: Собрать сайт
-        run: mkdir -p _site && cp index.html data.json _site/
+        run: |
+          mkdir -p _site
+          cp index.html data.json _site/
+          cp -R vendor _site/vendor
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
