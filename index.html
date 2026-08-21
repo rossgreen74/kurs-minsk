@@ -217,6 +217,10 @@ function ranked(c){
 }
 function best(c){return ranked(c)[0];}
 function myRate(c){return S.board[c]!==undefined?S.board[c]:rate(S.sel||best(c),c);}
+// на табло рубль РФ всегда за 100 единиц; внутри считаем за 1, показываем за 100
+function disp(c,r){return c==="RUB"?r*100:r;}
+function undisp(c,v){return c==="RUB"?v/100:v;}
+function clab(c){return c==="RUB"?"RUB (за 100)":c;}
 function dist(a,b,c,d){
   var R=6371,r=Math.PI/180,x=(c-a)*r,y=(d-b)*r;
   var h=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)*Math.sin(y/2);
@@ -234,12 +238,12 @@ function drawBest(){
     "Обновлено "+(mins<1?"меньше минуты":mins+" мин")+" назад · "+D.points.length+
     " обменных пунктов"+(old?". Проверьте курс на myfin</span>":"");
   $("best").innerHTML=
-    '<div class="calc"><div><div class="lbl">'+(S.mode==="sell"?"Покупка":"Продажа")+" "+c+
+    '<div class="calc"><div><div class="lbl">'+(S.mode==="sell"?"Покупка":"Продажа")+" "+clab(c)+
       '</div><div class="formula">'+(BANKS[b.bank]||b.bank)+" · "+b.addr+'</div></div>'+
       '<div class="big-rate">'+fmt(rate(b,c),4)+"</div></div>"+
     '<table class="data" style="margin-top:14px">'+
-      "<tr><td>медиана по городу</td><td>"+fmt(med,4)+"</td></tr>"+
-      "<tr><td>"+(S.mode==="sell"?"худшая покупка":"худшая продажа")+"</td><td>"+fmt(sells[sells.length-1],4)+"</td></tr>"+
+      "<tr><td>медиана по городу</td><td>"+fmt(disp(c,med),4)+"</td></tr>"+
+      "<tr><td>"+(S.mode==="sell"?"худшая покупка":"худшая продажа")+"</td><td>"+fmt(disp(c,sells[sells.length-1]),4)+"</td></tr>"+
       "<tr><td>официальный курс НБРБ<div class=\"formula\">индикатор, купить по нему нельзя</div></td><td>"+
         (D.nbrb?fmt(D.nbrb,4):"—")+"</td></tr></table>";
 }
@@ -280,15 +284,16 @@ function drawRates(){
       '<a href="#" onclick="reset(event)">вернуть лучший по городу</a>':
       "Лучший курс города по каждой валюте. Выберите точку в списке или на карте, чтобы считать по ней.";
   $("rateinputs").innerHTML=CURS.map(function(c){
-    return '<div class="field"><label>'+(S.mode==="sell"?"Покупка":"Продажа")+" "+c+
-      (c==="RUB"?" (за 1 рубль)":"")+'<span class="unit">BYN</span></label>'+
+    return '<div class="field"><label>'+(S.mode==="sell"?"Покупка":"Продажа")+" "+clab(c)+
+      '<span class="unit">BYN</span></label>'+
       '<input type="number" inputmode="decimal" step="0.0001" data-c="'+c+'" value="'+
-      myRate(c).toFixed(4)+'" oninput="onRate(this)"></div>';
+      disp(c,myRate(c)).toFixed(4)+'" oninput="onRate(this)"></div>';
   }).join("");
 }
 function onRate(el){
   var v=parseFloat(el.value);
-  if(v>0){S.board[el.getAttribute("data-c")]=v;drawRates0();drawTotal();drawNear();}
+  var c=el.getAttribute("data-c");
+  if(v>0){S.board[c]=undisp(c,v);drawRates0();drawTotal();drawNear();}
 }
 function drawRates0(){ // обновить только подпись, не трогая поля во время ввода
   $("ratesrc").innerHTML="<b style=\"color:var(--accent)\">Ваш курс, вписанный вручную.</b> "+
@@ -303,13 +308,13 @@ function drawTotal(){
   var big,cap,sub,amtCur;
   if(S.mode==="need"){          // хочу получить валюту -> сколько нужно рублей
     amtCur=a; big=fmt(a*r,2)+" BYN"; cap="Нужно принести в кассу";
-    sub="чтобы получить "+fmt(a,2)+" "+c+" по курсу "+fmt(r,4);
+    sub="чтобы получить "+fmt(a,2)+" "+c+" по курсу "+fmt(disp(c,r),4);
   }else if(S.mode==="have"){    // есть рубли -> сколько валюты
     amtCur=a/r; big=fmt(a/r,2)+" "+c; cap="Получите на руки";
-    sub="за "+fmt(a,2)+" BYN по курсу "+fmt(r,4);
+    sub="за "+fmt(a,2)+" BYN по курсу "+fmt(disp(c,r),4);
   }else{                        // сдаю валюту -> сколько рублей
     amtCur=a; big=fmt(a*r,2)+" BYN"; cap="Получите за валюту";
-    sub="сдавая "+fmt(a,2)+" "+c+" по курсу "+fmt(r,4);
+    sub="сдавая "+fmt(a,2)+" "+c+" по курсу "+fmt(disp(c,r),4);
   }
   var b=best(c), br=rate(b,c);
   var worse=S.mode==="sell"?r<br:r>br;
@@ -322,13 +327,13 @@ function drawTotal(){
   if(S.mode==="have"){
     rows=CURS.filter(function(x){return x!==c;}).map(function(x){
       return '<div class="calc"><div><div class="lbl">эти же '+fmt(a,2)+" BYN в "+NAMES[x]+
-        '</div><div class="formula">по курсу '+fmt(myRate(x),4)+"</div></div>"+
+        '</div><div class="formula">по курсу '+fmt(disp(x,myRate(x)),4)+"</div></div>"+
         '<div class="val">'+fmt(a/myRate(x),2)+" "+x+"</div></div>";
     }).join("");
   }else{
     rows=CURS.filter(function(x){return x!==c;}).map(function(x){
-      return '<div class="calc"><div><div class="lbl">'+fmt(a,2)+" "+ONE[x]+
-        '</div><div class="formula">по курсу '+fmt(myRate(x),4)+"</div></div>"+
+      return '<div class="calc"><div><div class="lbl">'+(S.mode==="need"?"а если бы ":"")+
+        fmt(a,2)+" "+x+'</div><div class="formula">по курсу '+fmt(disp(x,myRate(x)),4)+"</div></div>"+
         '<div class="val">'+fmt(a*myRate(x),2)+" BYN</div></div>";
     }).join("");
   }
@@ -340,7 +345,7 @@ function drawTotal(){
          :diff<50?["Посмотреть рядом","есть ли точка дешевле в пределах 3 км"]
                  :["Ехать в другую точку","это просто дорогая точка"];
     rows+='<div class="calc"><div><div class="lbl" style="color:var(--red);font-weight:700">'+v[0]+
-      '</div><div class="formula">против лучшего курса '+fmt(br,4)+" — "+v[1]+"</div></div>"+
+      '</div><div class="formula">против лучшего курса '+fmt(disp(c,br),4)+" — "+v[1]+"</div></div>"+
       '<div class="val" style="color:var(--red)">'+(S.mode==="sell"?"−":"+")+fmt(diff,2)+" BYN</div></div>";
   }
   $("detail").innerHTML='<div style="margin-top:16px">'+rows+"</div>";
@@ -351,7 +356,7 @@ function ptRow(p,gain){
   var c=S.cur;
   var y="https://yandex.ru/maps/?mode=routes&rtext=~"+p.lat+","+p.lon+"&rtt=auto";
   var g="https://2gis.ru/minsk/directions/tab/car/points/|"+p.lon+","+p.lat;
-  return '<div class="pt"><div class="rate">'+fmt(rate(p,c),4)+"</div>"+
+  return '<div class="pt"><div class="rate">'+fmt(disp(c,rate(p,c)),4)+"</div>"+
     '<div class="who"><b>'+(BANKS[p.bank]||p.bank)+"</b><div>"+p.addr+"</div>"+
     "<div>"+(p.d!==undefined?dtxt(p.d)+" · ":"")+"курс от "+(p.upd||"—")+
       (gain?' · <span class="win">выгода '+fmt(gain,0)+" BYN</span>":"")+"</div>"+
@@ -387,7 +392,7 @@ function drawNear(){
       '<div class="sub">По '+c+" это лучший курс из известных. Берите здесь.</div></div>";
     return;
   }
-  $("near").innerHTML='<div class="hint" style="margin:0 0 4px">Курс лучше, чем '+fmt(r,4)+
+  $("near").innerHTML='<div class="hint" style="margin:0 0 4px">Курс лучше, чем '+fmt(disp(c,r),4)+
     ", считая от "+(S.pos?"вашего места":"выбранной точки")+":</div>"+
     better.map(function(p){return ptRow(p,Math.abs(r-rate(p,c))*amtCur);}).join("");
 }
@@ -407,7 +412,7 @@ function drawMap(){
     var r=rate(p,c), good=S.mode==="sell"?r>=med:r<=med;
     L.circleMarker([p.lat,p.lon],{radius:r===rate(arr[0],c)?7:5,weight:1,color:"#0d0d0f",
       fillColor:good?"#ef8a26":"#6b6b75",fillOpacity:.95})
-     .bindPopup("<b>"+fmt(r,4)+"</b> "+c+"<br>"+(BANKS[p.bank]||p.bank)+"<br>"+p.addr+
+     .bindPopup("<b>"+fmt(disp(c,r),4)+"</b> "+clab(c)+"<br>"+(BANKS[p.bank]||p.bank)+"<br>"+p.addr+
        '<br><a href="#" onclick="pick('+p.i+',event)">считать по этой точке</a>'+
        ' · <a href="https://yandex.ru/maps/?mode=routes&rtext=~'+p.lat+","+p.lon+
        '&rtt=auto" target="_blank" rel="noopener">маршрут</a>')
