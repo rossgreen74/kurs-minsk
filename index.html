@@ -1,388 +1,471 @@
-<!doctype html>
-<html lang="ru" data-theme="auto">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0d0f">
+<meta name="color-scheme" content="dark">
 <title>Курс валют — обменники Минска</title>
-<meta name="description" content="Где сейчас дешевле наличный доллар в Минске, пересчёт любой суммы и ближайшие точки с курсом лучше">
-<meta name="theme-color" content="#0f172a">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>">
+<meta name="description" content="Где сейчас дешевле наличная валюта в Минске, пересчёт любой суммы и ближайшие точки с курсом лучше">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%B5%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="vendor/leaflet.css">
 <style>
-:root{
-  --bg:#f4f5f7; --card:#fff; --ink:#12151a; --dim:#5c6675; --line:#e3e6ea;
-  --good:#0f7a3d; --goodbg:#e6f4ec; --bad:#b0341f; --badbg:#fbeceb; --accent:#1a4fa0;
-  --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.1);
-}
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0d1117; --card:#161b22; --ink:#e8eaed; --dim:#9aa4b2; --line:#262d38;
-  --good:#4ade80; --goodbg:#12281c; --bad:#f87171; --badbg:#2b1614; --accent:#7aa2f7;
-  --shadow:none;
-}}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  padding:0 12px calc(28px + env(safe-area-inset-bottom));overflow-x:hidden;overflow-wrap:anywhere}
-.wrap{max-width:620px;margin:0 auto}
-h1{font-size:19px;margin:16px 2px 10px;letter-spacing:-.01em}
-h2{font-size:15px;margin:0 0 10px;letter-spacing:-.01em}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
-.big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
-.dim{color:var(--dim);font-size:13px}
-.row{display:flex;gap:8px;align-items:center;min-width:0}
-.row>*{min-width:0}
-.between{justify-content:space-between;flex-wrap:wrap;row-gap:8px}
-.wrapf{flex-wrap:wrap}
-button,.btn{font:inherit;font-size:14px;padding:9px 12px;border-radius:10px;
-  border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;
-  text-decoration:none;display:inline-block;text-align:center}
-button:active{transform:scale(.98)}
-.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;
-  padding:2px;gap:2px;min-width:0;max-width:100%}
-.seg button{flex:1;min-width:0;border:0;background:transparent;padding:8px 6px;border-radius:8px;
-  font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.seg button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:600}
-input[type=number],input[type=text]{font:inherit;width:100%;min-width:0;padding:11px 12px;border-radius:10px;
-  border:1px solid var(--line);background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
-input:focus{outline:2px solid var(--accent);outline-offset:-1px}
-label.f{display:block;flex:1;min-width:0}
-label.f span{display:block;font-size:12px;color:var(--dim);margin:0 0 4px 2px}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-td{padding:7px 0;border-top:1px solid var(--line);vertical-align:baseline}
-td:last-child{text-align:right;font-weight:600}
-tr:first-child td{border-top:0}
-.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600}
-.p-good{background:var(--goodbg);color:var(--good)}
-.p-bad{background:var(--badbg);color:var(--bad)}
-.pt{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:10px;align-items:flex-start}
-.pt:first-child{border-top:0}
-.pt .rate{font-size:19px;font-weight:700;min-width:72px;flex:none;font-variant-numeric:tabular-nums}
-.pt .who{flex:1;min-width:0}
-.pt .who b{font-weight:600;font-size:14px}
-.pt .who div{font-size:13px;color:var(--dim);overflow-wrap:anywhere}
-.pt .go{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
-.pt .go a{font-size:12px;padding:6px 9px}
-#map{height:330px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
-.note{font-size:13px;color:var(--dim);margin:9px 2px}
-.warn{background:var(--badbg);color:var(--bad);border-radius:10px;padding:9px 11px;font-size:14px;font-weight:600}
-.hint{font-size:12px;color:var(--dim);margin-top:6px}
-a{color:var(--accent)}
-.leaflet-popup-content{margin:10px 12px;font:14px/1.4 -apple-system,sans-serif}
+  :root{
+    --bg:#0d0d0f; --bg2:#141417; --card:#16161a; --card2:#1c1c21;
+    --ink:#f2f2f4; --muted:#8d8d96; --line:#2a2a30;
+    --accent:#ef8a26; --accent-soft:rgba(239,138,38,.14);
+    --green:#37c871; --green-soft:rgba(55,200,113,.13); --green-line:rgba(55,200,113,.35);
+    --red:#ff6b5e; --red-soft:rgba(255,107,94,.13);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:radial-gradient(140% 60% at 50% 0%,#1a1a1f 0%,var(--bg) 60%);
+    background-color:var(--bg);
+    color:var(--ink);line-height:1.5;padding:18px 14px 40px;min-height:100vh;overflow-x:hidden}
+  .wrap{max-width:520px;margin:0 auto}
+  .head{text-align:center;padding:10px 4px 20px}
+  .head h1{font-size:25px;line-height:1.14;margin:0;font-weight:800;letter-spacing:.01em;text-transform:uppercase}
+  .head h1 .o{color:var(--accent)}
+  .head p{color:var(--muted);font-size:13px;margin:11px 4px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:18px 16px;margin-bottom:14px}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);
+    margin:0 0 16px;font-weight:700}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:7px}
+  .unit{color:var(--accent);margin-left:5px;font-weight:600}
+  input[type=number]{width:100%;padding:14px;font-size:19px;font-weight:700;
+    border:1px solid var(--line);border-radius:12px;background:var(--bg2);color:var(--ink);
+    -moz-appearance:textfield;font-variant-numeric:tabular-nums}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input:focus{outline:none;border-color:var(--accent);background:#1a1a1d}
+  .toggle{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+  .toggle button{width:100%;padding:13px 15px;border:1px solid var(--line);background:var(--card2);
+    border-radius:14px;cursor:pointer;text-align:left;color:var(--ink);font-family:inherit}
+  .toggle button .t{font-weight:700;display:block;font-size:15px}
+  .toggle button .d{font-size:12px;color:var(--muted);margin-top:3px;display:block}
+  .toggle button.active{border-color:var(--accent);background:var(--accent-soft);
+    box-shadow:inset 0 0 0 1px var(--accent)}
+  .toggle button.active .t{color:var(--accent)}
+  .chips{display:flex;gap:8px;margin-bottom:14px}
+  .chips button{flex:1;min-width:0;padding:11px 4px;border:1px solid var(--line);background:var(--card2);
+    border-radius:12px;color:var(--ink);font:700 14px inherit;font-family:inherit;cursor:pointer}
+  .chips button.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+  .calc{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+    padding:13px 0;border-bottom:1px solid var(--line)}
+  .calc:last-child{border-bottom:none;padding-bottom:0}
+  .calc:first-child{padding-top:0}
+  .calc .lbl{font-size:13.5px}
+  .calc .formula{font-size:11.5px;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;
+    margin-top:3px;word-break:break-word}
+  .calc .val{font-size:15px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .result{background:var(--green-soft);border:1px solid var(--green-line);border-radius:16px;padding:16px}
+  .result .cap{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .result .big{font-size:34px;font-weight:800;margin:6px 0 2px;letter-spacing:-.02em;
+    color:var(--green);font-variant-numeric:tabular-nums;line-height:1.1}
+  .result .sub{font-size:13px;color:var(--muted)}
+  .result.warn{background:var(--red-soft);border-color:rgba(255,107,94,.35)}
+  .result.warn .big{color:var(--red)}
+  .big-rate{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1;
+    font-variant-numeric:tabular-nums;color:var(--accent)}
+  table.data{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.data td{padding:10px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+  table.data td:last-child{text-align:right;font-weight:700;white-space:nowrap;padding-left:10px;
+    font-variant-numeric:tabular-nums}
+  table.data tr:last-child td{border-bottom:none;padding-bottom:0}
+  table.data tr:first-child td{padding-top:0}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+  .btn{display:block;width:100%;padding:14px;border:1px solid var(--line);background:var(--card2);
+    border-radius:14px;color:var(--ink);font:700 15px inherit;font-family:inherit;cursor:pointer;text-align:center}
+  .btn.acc{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .pt{border-top:1px solid var(--line);padding:13px 0;display:flex;gap:11px;align-items:flex-start}
+  .pt:first-child{border-top:0;padding-top:0}
+  .pt .rate{font-size:19px;font-weight:800;min-width:74px;flex:none;color:var(--accent);
+    font-variant-numeric:tabular-nums}
+  .pt .who{flex:1;min-width:0}
+  .pt .who b{font-weight:700;font-size:14px}
+  .pt .who div{font-size:12px;color:var(--muted);overflow-wrap:anywhere;margin-top:2px}
+  .pt .go{display:flex;flex-direction:column;gap:6px;flex:none}
+  .pt .go a{font-size:11.5px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;
+    color:var(--ink);text-decoration:none;background:var(--card2);white-space:nowrap;text-align:center}
+  .win{color:var(--green);font-weight:700}
+  .stale{background:var(--red-soft);border:1px solid rgba(255,107,94,.35);border-radius:12px;
+    padding:11px 13px;font-size:13.5px;color:var(--red);font-weight:600}
+  #map{height:320px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--bg2)}
+  a{color:var(--accent)}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--card2);color:var(--ink)}
+  .leaflet-popup-content{margin:11px 13px;font:13px/1.45 -apple-system,sans-serif}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>Курс валют — обменники Минска</h1>
-
-<div class="card" id="head">
-  <div class="dim">загружаю курсы…</div>
-</div>
-
-<div class="card">
-  <h2>Пересчёт</h2>
-  <div class="row" style="margin-bottom:10px">
-    <label class="f"><span>Сумма</span><input type="number" id="amt" value="1000" min="0" step="any" inputmode="decimal"></label>
-    <label class="f" style="max-width:168px"><span>в чём</span>
-      <div class="seg" id="curseg">
-        <button data-c="BYN" aria-pressed="true">BYN</button>
-        <button data-c="USD">USD</button>
-        <button data-c="EUR">EUR</button>
-      </div>
-    </label>
+  <div class="head">
+    <h1>Курс <span class="o">валют</span><br>обменники Минска</h1>
+    <p id="sub">Загружаю курсы 528 обменных пунктов…</p>
   </div>
-  <div class="seg" id="dirseg" style="margin-bottom:10px">
-    <button data-d="buy" aria-pressed="true">Покупаю валюту</button>
-    <button data-d="sell">Сдаю валюту</button>
+
+  <div class="card">
+    <h2>Лучший курс города</h2>
+    <div id="best"></div>
   </div>
-  <div class="dim" id="ratesrc" style="margin-bottom:6px"></div>
-  <div class="row wrapf" id="rateinputs"></div>
-  <table id="calcout" style="margin-top:12px"></table>
-  <div id="verdict" style="margin-top:12px"></div>
-</div>
 
-<div class="card">
-  <h2>Я на месте — курс не тот</h2>
-  <div class="dim" style="margin-bottom:10px">Впишите курс с табло в поле выше и посмотрите,
-    что рядом. Кнопка ниже отсортирует точки от вас.</div>
-  <button id="geo" style="width:100%">Определить, где я</button>
-  <div id="near" style="margin-top:12px"></div>
-</div>
-
-<div class="card">
-  <div class="row between" style="margin-bottom:10px">
-    <h2 style="margin:0">Где дешевле</h2>
-    <div class="seg" id="sortseg" style="width:auto">
-      <button data-s="rate" aria-pressed="true">по курсу</button>
-      <button data-s="dist">по расстоянию</button>
+  <div class="card">
+    <h2>Пересчёт</h2>
+    <div class="toggle">
+      <button class="active" data-m="need" onclick="setMode('need')">
+        <span class="t">Хочу получить валюту</span>
+        <span class="d">Сколько рублей нужно принести в кассу</span>
+      </button>
+      <button data-m="have" onclick="setMode('have')">
+        <span class="t">У меня есть рубли</span>
+        <span class="d">Сколько валюты за них дадут</span>
+      </button>
+      <button data-m="sell" onclick="setMode('sell')">
+        <span class="t">Сдаю валюту</span>
+        <span class="d">Сколько рублей получу за неё</span>
+      </button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="field">
+      <label id="amtlab">Сумма<span class="unit" id="amtunit">USD</span></label>
+      <input type="number" inputmode="decimal" id="amt" value="1000" step="any" min="0">
     </div>
   </div>
-  <div id="list"></div>
-  <button id="more" style="width:100%;margin-top:10px">Показать ещё</button>
-</div>
 
-<div class="card">
-  <h2>Карта</h2>
-  <div id="map"></div>
-  <div class="hint">Зелёные — дешевле медианы по городу, красные — дороже. Тап по точке — подробности.</div>
-</div>
+  <div class="card">
+    <h2>Курс, по которому считаю</h2>
+    <div id="ratesrc" class="hint" style="margin:0 0 12px"></div>
+    <div id="rateinputs"></div>
+    <div class="hint">Если на табло другой курс — впишите его сюда, всё пересчитается.</div>
+  </div>
 
-<div class="card">
-  <h2>Что помнить у окошка</h2>
-  <p class="dim" style="margin:0 0 8px">Курс фиксирует <b>момент передачи денег кассиру</b>,
-  а не очередь: по деньгам, отданным до смены курса, операцию проводят по прежнему.
-  Подошли — сразу отдавайте рубли, не пересчитывайте у окна.</p>
-  <p class="dim" style="margin:0 0 8px">Разные курсы в двух кассах одного банка и смена курса
-  среди дня законны — Инструкция № 141 это прямо разрешает. Спорить не о чем, можно только уехать.</p>
-  <p class="dim" style="margin:0">Курс на этой странице — тот, что банк опубликовал несколько минут назад.
-  Обязателен для банка курс на табло. <a href="https://myfin.by/currency/minsk" target="_blank" rel="noopener">Проверить на myfin</a></p>
-</div>
+  <div class="card">
+    <h2>Итог</h2>
+    <div id="total"></div>
+    <div id="detail"></div>
+  </div>
 
-<p class="note">Данные: myfin.by. Обновляются автоматически каждые 15 минут в дневные часы.
-Страница ничего о вас не сохраняет и никуда не отправляет.</p>
+  <div class="card">
+    <h2>Я на месте — курс не тот</h2>
+    <button class="btn acc" id="geo" onclick="getPos()">Определить, где я</button>
+    <div id="near" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Где дешевле</h2>
+    <div class="chips" id="sortchips">
+      <button class="active" data-s="rate" onclick="setSort('rate')">по курсу</button>
+      <button data-s="dist" onclick="setSort('dist')">по расстоянию</button>
+    </div>
+    <div id="list"></div>
+    <button class="btn" id="more" onclick="more()" style="margin-top:12px">Показать ещё</button>
+  </div>
+
+  <div class="card">
+    <h2>Карта</h2>
+    <div id="map"></div>
+    <div class="hint">Оранжевые — дешевле медианы по городу, серые — дороже. Тап по точке — подробности и маршрут.</div>
+  </div>
+
+  <div class="card">
+    <h2>Что помнить у окошка</h2>
+    <div class="hint" style="margin-top:0;font-size:12.5px">
+      <p style="margin:0 0 10px">Курс фиксирует <b style="color:var(--ink)">момент передачи денег кассиру</b>,
+      а не очередь: по деньгам, отданным до смены курса, операцию проводят по прежнему.
+      Подошли — сразу отдавайте, не пересчитывайте у окна.</p>
+      <p style="margin:0 0 10px">Разные курсы в двух кассах одного банка и смена курса среди дня
+      законны — Инструкция № 141 это прямо разрешает. Спорить не о чем, можно только уехать.</p>
+      <p style="margin:0">Курс здесь — тот, что банк опубликовал несколько минут назад.
+      Обязателен для банка курс на табло.
+      <a href="https://myfin.by/currency/minsk" target="_blank" rel="noopener">Проверить на myfin</a></p>
+    </div>
+  </div>
+
+  <p class="hint" style="text-align:center">Данные: myfin.by. Обновляются автоматически каждые 15 минут
+  в дневные часы. Страница ничего о вас не сохраняет.</p>
 
 </div>
 
 <script defer src="vendor/leaflet.js"></script>
 <script>
-const BANKS={belarusbank:"Беларусбанк",technobank:"Технобанк",mtbank:"МТБанк",belswissbank:"БСБ Банк",
+var BANKS={belarusbank:"Беларусбанк",technobank:"Технобанк",mtbank:"МТБанк",belswissbank:"БСБ Банк",
 belagroprombank:"Белагропромбанк",alfabank:"Альфа-Банк","rrb-bank":"РРБ-Банк","bps-sberbank":"БПС-Сбербанк",
 bnbank:"БНБ-Банк",belinvestbank:"Белинвестбанк",paritetbank:"Паритетбанк",priorbank:"Приорбанк",
 "bank-vtb":"ВТБ",statusbank:"Статусбанк",belgazprombank:"Белгазпромбанк",dabrabyt:"Дабрабыт",
 bvebank:"БВБ",zepterbank:"Цептер Банк",btabank:"БТА Банк",belinkasgrupp:"Белинкасгрупп",
 tkbank:"ТК Банк",reshenie:"Решение"};
-const CURS=["USD","EUR","RUB"], NAMES={USD:"доллар",EUR:"евро",RUB:"рубль РФ"};
+var CURS=["USD","EUR","RUB"], NAMES={USD:"доллары",EUR:"евро",RUB:"российские рубли"};
+var ONE={USD:"доллар",EUR:"евро",RUB:"рубль РФ"};
 
-let D=null, S={amt:1000, cur:"BYN", dir:"buy", sort:"rate", pos:null, sel:null,
-               board:{}, shown:12}, map=null, layer=null;
+var D=null, map=null, layer=null, meMark=null;
+var S={mode:"need", cur:"USD", amt:1000, sort:"rate", pos:null, sel:null, board:{}, shown:10};
 
-const $=id=>document.getElementById(id);
-const fmt=(n,d=2)=>n.toLocaleString("ru-RU",{minimumFractionDigits:d,maximumFractionDigits:d});
-const rate=(p,c)=>p.r[c+"_"+(S.dir==="buy"?"sell":"buy")];
-// какая валюта считается основной: та, что выбрана в сумме, иначе доллар
-const main=()=>S.cur==="BYN"?"USD":S.cur;
-
-function dist(a,b,c,d){ // километры, формула гаверсинуса
-  const R=6371,r=Math.PI/180,x=(c-a)*r,y=(d-b)*r;
-  const h=Math.sin(x/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)**2;
+function $(id){return document.getElementById(id);}
+function fmt(n,d){if(d===undefined)d=2;
+  return n.toLocaleString("ru-RU",{minimumFractionDigits:d,maximumFractionDigits:d});}
+// покупка валюты идёт по курсу продажи банка, сдача — по курсу покупки
+function side(){return S.mode==="sell"?"buy":"sell";}
+function rate(p,c){return p.r[c+"_"+side()];}
+function fresh(){var a=[];for(var i=0;i<D.points.length;i++)if(!D.points[i].stale)a.push(D.points[i]);return a;}
+function ranked(c){
+  var a=fresh().filter(function(p){return rate(p,c)>0;});
+  a.sort(function(x,y){return S.mode==="sell"?rate(y,c)-rate(x,c):rate(x,c)-rate(y,c);});
+  return a;
+}
+function best(c){return ranked(c)[0];}
+function myRate(c){return S.board[c]!==undefined?S.board[c]:rate(S.sel||best(c),c);}
+function dist(a,b,c,d){
+  var R=6371,r=Math.PI/180,x=(c-a)*r,y=(d-b)*r;
+  var h=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)*Math.sin(y/2);
   return 2*R*Math.asin(Math.sqrt(h));
 }
-const dtxt=k=>k<1?Math.round(k*1000)+" м":fmt(k,1)+" км";
+function dtxt(k){return k<1?Math.round(k*1000)+" м":fmt(k,1)+" км";}
 
-// точки со свежей котировкой по нужной валюте, отсортированные «выгодно → невыгодно»
-function ranked(c){
-  const arr=D.points.filter(p=>!p.stale && p.r[c+"_"+(S.dir==="buy"?"sell":"buy")]>0);
-  return arr.sort((x,y)=>S.dir==="buy"?rate(x,c)-rate(y,c):rate(y,c)-rate(x,c));
-}
-const best=c=>ranked(c)[0];
-
-function withDist(list){
-  if(!S.pos) return list;
-  return list.map(p=>({...p,d:dist(S.pos.lat,S.pos.lon,p.lat,p.lon)}));
-}
-
-/* ---------- шапка ---------- */
-function head(){
-  const b=best("USD"), s=ranked("USD").map(p=>rate(p,"USD")), med=s[Math.floor(s.length/2)];
-  const min=Math.round((Date.now()-new Date(D.snapped))/60000);
-  const stale=min>60;
-  $("head").innerHTML=`
-    <div class="row between" style="align-items:flex-end">
-      <div>
-        <div class="dim">${S.dir==="buy"?"Продажа":"Покупка"} USD — лучший курс города</div>
-        <div class="big">${fmt(rate(b,"USD"),4)}</div>
-      </div>
-      <button onclick="location.reload()">Обновить</button>
-    </div>
-    <div class="dim" style="margin-top:8px">${BANKS[b.bank]||b.bank} · ${b.addr}</div>
-    <table style="margin-top:10px">
-      <tr><td>медиана по городу</td><td>${fmt(med,4)}</td></tr>
-      <tr><td>худший курс</td><td>${fmt(s[s.length-1],4)}</td></tr>
-      <tr><td>официальный курс НБРБ<div class="hint">индикатор, купить по нему нельзя</div></td>
-          <td>${D.nbrb?fmt(D.nbrb,4):"—"}</td></tr>
-    </table>
-    <div style="margin-top:10px" class="${stale?"warn":"dim"}">
-      ${stale?"Данные устарели: ":"Обновлено "}${min<1?"меньше минуты":min+" мин"} назад ·
-      ${D.points.length} точек${stale?". Проверьте курс на myfin":""}</div>`;
+/* ---------- лучший курс ---------- */
+function drawBest(){
+  var c=S.cur, arr=ranked(c), b=arr[0], sells=arr.map(function(p){return rate(p,c);});
+  var med=sells[Math.floor(sells.length/2)];
+  var mins=Math.round((new Date()-new Date(D.snapped))/60000);
+  var old=mins>60;
+  $("sub").innerHTML=(old?'<span style="color:var(--red)">':"")+
+    "Обновлено "+(mins<1?"меньше минуты":mins+" мин")+" назад · "+D.points.length+
+    " обменных пунктов"+(old?". Проверьте курс на myfin</span>":"");
+  $("best").innerHTML=
+    '<div class="calc"><div><div class="lbl">'+(S.mode==="sell"?"Покупка":"Продажа")+" "+c+
+      '</div><div class="formula">'+(BANKS[b.bank]||b.bank)+" · "+b.addr+'</div></div>'+
+      '<div class="big-rate">'+fmt(rate(b,c),4)+"</div></div>"+
+    '<table class="data" style="margin-top:14px">'+
+      "<tr><td>медиана по городу</td><td>"+fmt(med,4)+"</td></tr>"+
+      "<tr><td>"+(S.mode==="sell"?"худшая покупка":"худшая продажа")+"</td><td>"+fmt(sells[sells.length-1],4)+"</td></tr>"+
+      "<tr><td>официальный курс НБРБ<div class=\"formula\">индикатор, купить по нему нельзя</div></td><td>"+
+        (D.nbrb?fmt(D.nbrb,4):"—")+"</td></tr></table>";
 }
 
-/* ---------- калькулятор ---------- */
-function rateInputs(){
-  const src=S.sel?`точка ${BANKS[S.sel.bank]||S.sel.bank}, ${S.sel.addr}`:"лучший курс города";
-  $("ratesrc").innerHTML=`Курс: ${Object.keys(S.board).length?"<b>ваш, с табло</b>":src}
-    ${S.sel||Object.keys(S.board).length?'· <a href="#" onclick="reset(event)">сбросить</a>':""}`;
-  $("rateinputs").innerHTML=CURS.map(c=>{
-    const p=S.sel||best(c);
-    const v=S.board[c]!==undefined?S.board[c]:rate(p,c);
-    return `<label class="f" style="min-width:88px"><span>${c}${c==="RUB"?" (за 1)":""}</span>
-      <input type="number" step="0.0001" inputmode="decimal" data-c="${c}" value="${v.toFixed(4)}"></label>`;
+/* ---------- ввод ---------- */
+function setMode(m){
+  S.mode=m; S.board={};
+  var b=document.querySelectorAll(".toggle button");
+  for(var i=0;i<b.length;i++) b[i].className=b[i].getAttribute("data-m")===m?"active":"";
+  redraw();
+}
+function setCur(c){S.cur=c;S.board={};redraw();}
+function setSort(s){
+  if(s==="dist"&&!S.pos){getPos();return;}
+  S.sort=s;
+  var b=$("sortchips").children;
+  for(var i=0;i<b.length;i++) b[i].className=b[i].getAttribute("data-s")===s?"active":"";
+  drawList();
+}
+function more(){S.shown+=20;drawList();}
+
+function drawChips(){
+  $("chips").innerHTML=CURS.map(function(c){
+    return '<button class="'+(c===S.cur?"active":"")+'" onclick="setCur(\''+c+'\')">'+c+"</button>";
   }).join("");
-  $("rateinputs").querySelectorAll("input").forEach(i=>i.oninput=e=>{
-    const v=parseFloat(e.target.value); if(v>0){S.board[e.target.dataset.c]=v; calc(); nearby();}
-  });
+  var byn=S.mode==="have";
+  $("amtlab").innerHTML=(S.mode==="need"?"Хочу получить на руки":
+                         S.mode==="have"?"Есть рублей":"Сдаю")+
+    '<span class="unit">'+(byn?"BYN":S.cur)+"</span>";
 }
 
-function curRate(c){
-  if(S.board[c]!==undefined) return S.board[c];
-  return rate(S.sel||best(c),c);
+function drawRates(){
+  var p=S.sel;
+  $("ratesrc").innerHTML=Object.keys(S.board).length?
+      "<b style=\"color:var(--accent)\">Ваш курс, вписанный вручную.</b> "+
+      '<a href="#" onclick="reset(event)">вернуть курс города</a>':
+    p?"Точка: <b style=\"color:var(--ink)\">"+(BANKS[p.bank]||p.bank)+", "+p.addr+"</b>. "+
+      '<a href="#" onclick="reset(event)">вернуть лучший по городу</a>':
+      "Лучший курс города по каждой валюте. Выберите точку в списке или на карте, чтобы считать по ней.";
+  $("rateinputs").innerHTML=CURS.map(function(c){
+    return '<div class="field"><label>'+(S.mode==="sell"?"Покупка":"Продажа")+" "+c+
+      (c==="RUB"?" (за 1 рубль)":"")+'<span class="unit">BYN</span></label>'+
+      '<input type="number" inputmode="decimal" step="0.0001" data-c="'+c+'" value="'+
+      myRate(c).toFixed(4)+'" oninput="onRate(this)"></div>';
+  }).join("");
 }
+function onRate(el){
+  var v=parseFloat(el.value);
+  if(v>0){S.board[el.getAttribute("data-c")]=v;drawRates0();drawTotal();drawNear();}
+}
+function drawRates0(){ // обновить только подпись, не трогая поля во время ввода
+  $("ratesrc").innerHTML="<b style=\"color:var(--accent)\">Ваш курс, вписанный вручную.</b> "+
+    '<a href="#" onclick="reset(event)">вернуть курс города</a>';
+}
+function reset(e){e.preventDefault();S.board={};S.sel=null;redraw();}
 
-function calc(){
-  const a=S.amt, out=$("calcout");
-  if(!(a>0)){out.innerHTML='<tr><td class="dim">введите сумму</td></tr>';$("verdict").innerHTML="";return;}
-  let rows;
-  if(S.cur==="BYN"){
-    rows=CURS.map(c=>`<tr><td>${NAMES[c]}</td><td>${fmt(a/curRate(c),2)} ${c}</td></tr>`);
-    rows.unshift(`<tr><td class="dim">${S.dir==="buy"?"за":"получите за"} ${fmt(a,2)} BYN ${S.dir==="buy"?"получите":""}</td><td></td></tr>`);
-  }else{
-    const c=S.cur, byn=a*curRate(c);
-    rows=[`<tr><td class="dim">${S.dir==="buy"?"заплатите за":"получите за"} ${fmt(a,2)} ${c}</td>
-           <td style="font-size:19px">${fmt(byn,2)} BYN</td></tr>`];
-    CURS.filter(x=>x!==c).forEach(x=>rows.push(
-      `<tr><td>это же в ${NAMES[x]}</td><td>${fmt(byn/curRate(x),2)} ${x}</td></tr>`));
+/* ---------- итог ---------- */
+function drawTotal(){
+  var c=S.cur, r=myRate(c), a=S.amt;
+  if(!(a>0)||!(r>0)){$("total").innerHTML='<div class="hint" style="margin:0">Введите сумму</div>';$("detail").innerHTML="";return;}
+  var big,cap,sub,amtCur;
+  if(S.mode==="need"){          // хочу получить валюту -> сколько нужно рублей
+    amtCur=a; big=fmt(a*r,2)+" BYN"; cap="Нужно принести в кассу";
+    sub="чтобы получить "+fmt(a,2)+" "+c+" по курсу "+fmt(r,4);
+  }else if(S.mode==="have"){    // есть рубли -> сколько валюты
+    amtCur=a/r; big=fmt(a/r,2)+" "+c; cap="Получите на руки";
+    sub="за "+fmt(a,2)+" BYN по курсу "+fmt(r,4);
+  }else{                        // сдаю валюту -> сколько рублей
+    amtCur=a; big=fmt(a*r,2)+" BYN"; cap="Получите за валюту";
+    sub="сдавая "+fmt(a,2)+" "+c+" по курсу "+fmt(r,4);
   }
-  out.innerHTML=rows.join("");
-  verdict();
+  var b=best(c), br=rate(b,c);
+  var worse=S.mode==="sell"?r<br:r>br;
+  var diff=Math.abs(r-br)*amtCur;
+  $("total").innerHTML='<div class="result'+(worse&&diff>=20?" warn":"")+'">'+
+    '<div class="cap">'+cap+'</div><div class="big">'+big+"</div>"+
+    '<div class="sub">'+sub+"</div></div>";
+
+  var rows="";
+  if(S.mode==="have"){
+    rows=CURS.filter(function(x){return x!==c;}).map(function(x){
+      return '<div class="calc"><div><div class="lbl">эти же '+fmt(a,2)+" BYN в "+NAMES[x]+
+        '</div><div class="formula">по курсу '+fmt(myRate(x),4)+"</div></div>"+
+        '<div class="val">'+fmt(a/myRate(x),2)+" "+x+"</div></div>";
+    }).join("");
+  }else{
+    rows=CURS.filter(function(x){return x!==c;}).map(function(x){
+      return '<div class="calc"><div><div class="lbl">'+fmt(a,2)+" "+ONE[x]+
+        '</div><div class="formula">по курсу '+fmt(myRate(x),4)+"</div></div>"+
+        '<div class="val">'+fmt(a*myRate(x),2)+" BYN</div></div>";
+    }).join("");
+  }
+  if(!worse||diff<0.5){
+    rows+='<div class="calc"><div class="lbl" style="color:var(--green);font-weight:700">'+
+      "Это лучший курс города по "+c+"</div><div class=\"val\" style=\"color:var(--green)\">✓</div></div>";
+  }else{
+    var v=diff<20?["Брать здесь","дорога и час времени стоят дороже разницы"]
+         :diff<50?["Посмотреть рядом","есть ли точка дешевле в пределах 3 км"]
+                 :["Ехать в другую точку","это просто дорогая точка"];
+    rows+='<div class="calc"><div><div class="lbl" style="color:var(--red);font-weight:700">'+v[0]+
+      '</div><div class="formula">против лучшего курса '+fmt(br,4)+" — "+v[1]+"</div></div>"+
+      '<div class="val" style="color:var(--red)">'+(S.mode==="sell"?"−":"+")+fmt(diff,2)+" BYN</div></div>";
+  }
+  $("detail").innerHTML='<div style="margin-top:16px">'+rows+"</div>";
 }
 
-function verdict(){
-  const c=main(), b=best(c), br=rate(b,c), mine=curRate(c);
-  const amtC=S.cur==="BYN"?S.amt/mine:S.amt;          // сумма в валюте
-  const diff=Math.abs(mine-br)*amtC;                   // переплата в рублях
-  const worse=S.dir==="buy"?mine>br:mine<br;
-  if(!worse||diff<0.5){
-    $("verdict").innerHTML=`<div class="pill p-good">Это лучший курс города по ${c}</div>`;
+/* ---------- точки ---------- */
+function ptRow(p,gain){
+  var c=S.cur;
+  var y="https://yandex.ru/maps/?mode=routes&rtext=~"+p.lat+","+p.lon+"&rtt=auto";
+  var g="https://2gis.ru/minsk/directions/tab/car/points/|"+p.lon+","+p.lat;
+  return '<div class="pt"><div class="rate">'+fmt(rate(p,c),4)+"</div>"+
+    '<div class="who"><b>'+(BANKS[p.bank]||p.bank)+"</b><div>"+p.addr+"</div>"+
+    "<div>"+(p.d!==undefined?dtxt(p.d)+" · ":"")+"курс от "+(p.upd||"—")+
+      (gain?' · <span class="win">выгода '+fmt(gain,0)+" BYN</span>":"")+"</div>"+
+    '<div style="margin-top:6px"><a href="#" onclick="pick('+p.i+',event)" style="color:var(--accent)">считать по этой точке</a></div></div>'+
+    '<div class="go"><a href="'+y+'" target="_blank" rel="noopener">Маршрут</a>'+
+    '<a href="'+g+'" target="_blank" rel="noopener">2ГИС</a></div></div>';
+}
+function pick(i,e){
+  if(e)e.preventDefault();
+  S.sel=D.points[i]; S.board={}; redraw();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function drawList(){
+  var arr=ranked(S.cur).slice();
+  if(S.pos){arr.forEach(function(p){p.d=dist(S.pos.lat,S.pos.lon,p.lat,p.lon);});}
+  if(S.sort==="dist"&&S.pos) arr.sort(function(x,y){return x.d-y.d;});
+  $("list").innerHTML=arr.slice(0,S.shown).map(function(p){return ptRow(p);}).join("");
+  $("more").style.display=S.shown>=arr.length?"none":"block";
+}
+
+function drawNear(){
+  var c=S.cur, r=myRate(c), from=S.pos||S.sel;
+  if(!from){$("near").innerHTML='<div class="hint" style="margin:0">Нажмите кнопку выше или выберите точку в списке — покажу, где рядом курс лучше.</div>';return;}
+  var better=ranked(c).filter(function(p){return S.mode==="sell"?rate(p,c)>r+1e-9:rate(p,c)<r-1e-9;});
+  better.forEach(function(p){p.d=dist(from.lat,from.lon,p.lat,p.lon);});
+  better.sort(function(x,y){return x.d-y.d;});
+  better=better.slice(0,5);
+  var amtCur=S.mode==="have"?S.amt/r:S.amt;
+  if(!better.length){
+    $("near").innerHTML='<div class="result"><div class="cap">Проверено</div>'+
+      '<div class="big" style="font-size:22px">Лучше рядом нет</div>'+
+      '<div class="sub">По '+c+" это лучший курс из известных. Берите здесь.</div></div>";
     return;
   }
-  const verd=diff<20?["p-good","Брать здесь","дорога и час времени стоят дороже разницы"]
-            :diff<50?["p-bad","Посмотреть рядом","есть ли точка дешевле в пределах 3 км"]
-                    :["p-bad","Ехать","это просто дорогая точка"];
-  $("verdict").innerHTML=`
-    <div class="row between wrapf" style="gap:6px">
-      <span class="pill ${verd[0]}">${verd[1]}</span>
-      <b>${fmt(diff,2)} BYN</b>
-    </div>
-    <div class="hint">Против лучшего курса города (${fmt(br,4)}) на этой сумме
-      ${S.dir==="buy"?"переплата":"недополучите"} ${fmt(diff,2)} BYN — ${verd[2]}.</div>`;
-}
-function reset(e){e.preventDefault();S.board={};S.sel=null;rateInputs();calc();nearby();list();}
-
-/* ---------- ближайшие дешевле ---------- */
-function nearby(){
-  const c=main(), mine=curRate(c), from=S.pos||S.sel;
-  if(!from){$("near").innerHTML='<div class="dim">Нажмите кнопку выше или выберите точку в списке — покажу, что дешевле рядом.</div>';return;}
-  const o={lat:from.lat,lon:from.lon};
-  const cheaper=ranked(c).filter(p=>S.dir==="buy"?rate(p,c)<mine-1e-9:rate(p,c)>mine+1e-9)
-    .map(p=>({...p,d:dist(o.lat,o.lon,p.lat,p.lon)}))
-    .sort((x,y)=>x.d-y.d).slice(0,6);
-  const amtC=S.cur==="BYN"?S.amt/mine:S.amt;
-  if(!cheaper.length){$("near").innerHTML=`<div class="pill p-good">Дешевле по ${c} рядом нет — берите здесь</div>`;return;}
-  $("near").innerHTML=`<div class="dim" style="margin-bottom:6px">Дешевле, чем ${fmt(mine,4)},
-    считая от ${S.pos?"вашего места":"выбранной точки"}:</div>`+
-    cheaper.map(p=>ptRow(p,c,(Math.abs(mine-rate(p,c))*amtC))).join("");
-}
-
-/* ---------- строка точки ---------- */
-function ptRow(p,c,gain){
-  const y=`https://yandex.ru/maps/?mode=routes&rtext=~${p.lat},${p.lon}&rtt=auto`;
-  const g=`https://2gis.ru/minsk/directions/tab/car/points/|${p.lon},${p.lat}`;
-  return `<div class="pt">
-    <div class="rate">${fmt(rate(p,c),4)}</div>
-    <div class="who"><b>${BANKS[p.bank]||p.bank}</b>
-      <div>${p.addr}</div>
-      <div>${p.d!==undefined?dtxt(p.d)+" · ":""}курс от ${p.upd||"—"}${p.stale?" · не обновлялся":""}
-        ${gain?` · <b style="color:var(--good)">выгода ${fmt(gain,0)} BYN</b>`:""}</div></div>
-    <div class="go"><a class="btn" href="${y}" target="_blank" rel="noopener">Маршрут</a>
-      <a class="btn" href="${g}" target="_blank" rel="noopener">2ГИС</a></div></div>`;
-}
-
-/* ---------- список ---------- */
-function list(){
-  const c=main();
-  let arr=withDist(ranked(c));
-  if(S.sort==="dist"&&S.pos) arr=[...arr].sort((x,y)=>x.d-y.d);
-  $("list").innerHTML=arr.slice(0,S.shown).map(p=>ptRow(p,c)).join("");
-  $("more").style.display=S.shown>=arr.length?"none":"block";
+  $("near").innerHTML='<div class="hint" style="margin:0 0 4px">Курс лучше, чем '+fmt(r,4)+
+    ", считая от "+(S.pos?"вашего места":"выбранной точки")+":</div>"+
+    better.map(function(p){return ptRow(p,Math.abs(r-rate(p,c))*amtCur);}).join("");
 }
 
 /* ---------- карта ---------- */
 function drawMap(){
-  if(typeof L==="undefined"){$("map").innerHTML='<div class="dim" style="padding:12px">Карта не загрузилась — нужен интернет.</div>';return;}
-  const c=main(), arr=ranked(c), med=rate(arr[Math.floor(arr.length/2)],c);
+  if(typeof L==="undefined"){return;}
+  var c=S.cur, arr=ranked(c), med=rate(arr[Math.floor(arr.length/2)],c);
   if(!map){
     map=L.map("map",{scrollWheelZoom:false}).setView([53.902,27.5615],11);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       {maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
   }
-  if(layer) layer.remove();
+  if(layer)layer.remove();
   layer=L.layerGroup().addTo(map);
-  arr.forEach(p=>{
-    const r=rate(p,c), good=S.dir==="buy"?r<=med:r>=med;
-    L.circleMarker([p.lat,p.lon],{radius:r===rate(arr[0],c)?7:5,weight:1,color:"#fff",
-      fillColor:good?"#0f7a3d":"#b0341f",fillOpacity:.9})
-     .bindPopup(`<b>${fmt(r,4)}</b> ${c}<br>${BANKS[p.bank]||p.bank}<br>${p.addr}
-       <br><a href="https://yandex.ru/maps/?mode=routes&rtext=~${p.lat},${p.lon}&rtt=auto"
-       target="_blank" rel="noopener">Маршрут</a>`)
-     .on("click",()=>{S.sel=p;S.board={};rateInputs();calc();nearby();})
+  arr.forEach(function(p){
+    var r=rate(p,c), good=S.mode==="sell"?r>=med:r<=med;
+    L.circleMarker([p.lat,p.lon],{radius:r===rate(arr[0],c)?7:5,weight:1,color:"#0d0d0f",
+      fillColor:good?"#ef8a26":"#6b6b75",fillOpacity:.95})
+     .bindPopup("<b>"+fmt(r,4)+"</b> "+c+"<br>"+(BANKS[p.bank]||p.bank)+"<br>"+p.addr+
+       '<br><a href="#" onclick="pick('+p.i+',event)">считать по этой точке</a>'+
+       ' · <a href="https://yandex.ru/maps/?mode=routes&rtext=~'+p.lat+","+p.lon+
+       '&rtt=auto" target="_blank" rel="noopener">маршрут</a>')
      .addTo(layer);
   });
 }
 
-/* ---------- события ---------- */
-$("amt").oninput=e=>{S.amt=parseFloat(e.target.value)||0;calc();nearby();};
-$("curseg").onclick=e=>{const b=e.target.closest("button");if(!b)return;
-  S.cur=b.dataset.c;[...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));
-  rateInputs();calc();nearby();list();drawMap();};
-$("dirseg").onclick=e=>{const b=e.target.closest("button");if(!b)return;
-  S.dir=b.dataset.d;[...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));
-  S.board={};head();rateInputs();calc();nearby();list();drawMap();};
-$("sortseg").onclick=e=>{const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.s==="dist"&&!S.pos){getPos();return;}
-  S.sort=b.dataset.s;[...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));list();};
-$("more").onclick=()=>{S.shown+=20;list();};
-$("geo").onclick=getPos;
-
+/* ---------- где я ---------- */
 function getPos(){
-  if(!navigator.geolocation){$("near").innerHTML='<div class="dim">Телефон не отдаёт местоположение — выберите точку в списке или на карте.</div>';return;}
+  if(!navigator.geolocation){$("near").innerHTML='<div class="hint" style="margin:0">Телефон не отдаёт местоположение — выберите точку в списке.</div>';return;}
   $("geo").textContent="Определяю…";
-  navigator.geolocation.getCurrentPosition(g=>{
+  navigator.geolocation.getCurrentPosition(function(g){
     S.pos={lat:g.coords.latitude,lon:g.coords.longitude};
     $("geo").textContent="Я здесь ✓";
-    S.sort="dist";[...$("sortseg").children].forEach(x=>x.setAttribute("aria-pressed",x.dataset.s==="dist"));
-    // ближайшая точка становится «моей», её курс — отправной
-    const n=withDist(ranked(main())).sort((a,b)=>a.d-b.d)[0];
-    if(n&&n.d<0.7){S.sel=n;S.board={};}
-    rateInputs();calc();nearby();list();
-    if(map)L.circleMarker([S.pos.lat,S.pos.lon],{radius:8,color:"#1a4fa0",weight:3,
-      fillColor:"#1a4fa0",fillOpacity:.35}).addTo(map).bindPopup("Вы здесь");
-    if(map)map.setView([S.pos.lat,S.pos.lon],13);
-  },err=>{
+    var arr=ranked(S.cur).slice();
+    arr.forEach(function(p){p.d=dist(S.pos.lat,S.pos.lon,p.lat,p.lon);});
+    arr.sort(function(x,y){return x.d-y.d;});
+    if(arr[0]&&arr[0].d<0.7){S.sel=arr[0];S.board={};}
+    S.sort="dist";
+    var b=$("sortchips").children;
+    for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute("data-s")==="dist"?"active":"";
+    redraw();
+    if(map){
+      if(meMark)meMark.remove();
+      meMark=L.circleMarker([S.pos.lat,S.pos.lon],{radius:9,color:"#37c871",weight:3,
+        fillColor:"#37c871",fillOpacity:.35}).addTo(map).bindPopup("Вы здесь");
+      map.setView([S.pos.lat,S.pos.lon],13);
+    }
+  },function(){
     $("geo").textContent="Определить, где я";
-    $("near").innerHTML='<div class="dim">Местоположение не получено. Выберите свою точку в списке или на карте — считать буду от неё.</div>';
+    $("near").innerHTML='<div class="hint" style="margin:0">Местоположение не получено — разрешите доступ в настройках Safari или выберите точку в списке.</div>';
   },{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
 }
 
-/* ---------- старт ---------- */
-const slow=setTimeout(()=>{const h=$("head");
-  if(h.textContent.includes("загружаю"))
-    h.innerHTML='<div class="warn">Курсы грузятся дольше обычного. Если не появятся — проверьте интернет и обновите страницу.</div>';},8000);
+/* ---------- сборка ---------- */
+function redraw(){drawBest();drawChips();drawRates();drawTotal();drawNear();drawList();drawMap();}
 
-fetch("data.json?t="+Date.now()).then(r=>{
-  if(!r.ok) throw new Error("HTTP "+r.status);
+$("amt").oninput=function(){S.amt=parseFloat(this.value)||0;drawTotal();drawNear();};
+
+var slow=setTimeout(function(){
+  if(!D)$("sub").innerHTML='<span style="color:var(--red)">Курсы грузятся дольше обычного. Если не появятся — обновите страницу.</span>';
+},8000);
+
+fetch("data.json?t="+Date.now()).then(function(r){
+  if(!r.ok)throw new Error("HTTP "+r.status);
   return r.json();
-}).then(d=>{
+}).then(function(d){
   clearTimeout(slow);
-  D=d; head(); rateInputs(); calc(); nearby(); list(); drawMap();
-}).catch(e=>{
+  D=d;
+  for(var i=0;i<D.points.length;i++) D.points[i].i=i;   // индекс для ссылок «считать по этой точке»
+  redraw();
+}).catch(function(e){
   clearTimeout(slow);
-  $("head").innerHTML='<div class="warn">Не удалось загрузить курсы ('+e.message+'). '+
-    'Проверьте интернет и обновите страницу. Курс всегда можно посмотреть на '+
-    '<a href="https://myfin.by/currency/minsk">myfin</a>.</div>';
+  $("sub").innerHTML='<span style="color:var(--red)">Не удалось загрузить курсы ('+e.message+
+    '). Обновите страницу или смотрите <a href="https://myfin.by/currency/minsk">myfin</a>.</span>';
 });
 
-// leaflet.js загружается с defer и может быть ещё не готов к первому вызову drawMap
-addEventListener("load",()=>{if(D&&!map)drawMap();});
+addEventListener("load",function(){if(D&&!map)drawMap();});
 </script>
 </body>
 </html>
