@@ -45,7 +45,12 @@ def parse(raw):
                 val = float(v.group(1).strip().replace(",", "."))
             except ValueError:
                 continue
-            rates[f"{c.group(1)}_{'sell' if sd.group(1) == 'rate_sell' else 'buy'}"] = val
+            # рубль РФ котируется за 100 единиц — приводим к курсу за единицу,
+            # иначе калькулятор ошибётся ровно в сто раз
+            m = re.search(r'data-multiplier="(\d+)"', td)
+            if m and m.group(1) != "1":
+                val /= float(m.group(1))
+            rates[f"{c.group(1)}_{'sell' if sd.group(1) == 'rate_sell' else 'buy'}"] = round(val, 6)
             stale = stale or "depricated" in td
         if "USD_sell" not in rates or "USD_buy" not in rates:
             continue
