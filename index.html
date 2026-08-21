@@ -7,7 +7,7 @@
 <meta name="description" content="Где сейчас дешевле наличный доллар в Минске, пересчёт любой суммы и ближайшие точки с курсом лучше">
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="vendor/leaflet.css">
 <style>
 :root{
   --bg:#f4f5f7; --card:#fff; --ink:#12151a; --dim:#5c6675; --line:#e3e6ea;
@@ -144,7 +144,7 @@ a{color:var(--accent)}
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="vendor/leaflet.js"></script>
 <script>
 const BANKS={belarusbank:"Беларусбанк",technobank:"Технобанк",mtbank:"МТБанк",belswissbank:"БСБ Банк",
 belagroprombank:"Белагропромбанк",alfabank:"Альфа-Банк","rrb-bank":"РРБ-Банк","bps-sberbank":"БПС-Сбербанк",
@@ -364,11 +364,25 @@ function getPos(){
 }
 
 /* ---------- старт ---------- */
-fetch("data.json?t="+Date.now()).then(r=>r.json()).then(d=>{
+const slow=setTimeout(()=>{const h=$("head");
+  if(h.textContent.includes("загружаю"))
+    h.innerHTML='<div class="warn">Курсы грузятся дольше обычного. Если не появятся — проверьте интернет и обновите страницу.</div>';},8000);
+
+fetch("data.json?t="+Date.now()).then(r=>{
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}).then(d=>{
+  clearTimeout(slow);
   D=d; head(); rateInputs(); calc(); nearby(); list(); drawMap();
 }).catch(e=>{
-  $("head").innerHTML='<div class="warn">Не удалось загрузить курсы. Проверьте интернет и обновите страницу.</div>';
+  clearTimeout(slow);
+  $("head").innerHTML='<div class="warn">Не удалось загрузить курсы ('+e.message+'). '+
+    'Проверьте интернет и обновите страницу. Курс всегда можно посмотреть на '+
+    '<a href="https://myfin.by/currency/minsk">myfin</a>.</div>';
 });
+
+// leaflet.js загружается с defer и может быть ещё не готов к первому вызову drawMap
+addEventListener("load",()=>{if(D&&!map)drawMap();});
 </script>
 </body>
 </html>
